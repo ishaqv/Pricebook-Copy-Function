@@ -1,0 +1,26 @@
+plugins {
+    id "com.microsoft.azure.azurefunctions" version "1.8.2"
+}
+apply plugin: "java"
+
+group 'com.example'
+version '1.0.0-SNAPSHOT'
+
+dependencies {
+    implementation 'com.microsoft.azure.functions:azure-functions-java-library:2.0.1'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+    implementation 'org.apache.httpcomponents:httpmime:4.5.13'
+}
+
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
+
+repositories {
+    mavenCentral()
+}
+
+azurefunctions {
+
+    appName = 'pricebook-copy-fun'
+
+}
