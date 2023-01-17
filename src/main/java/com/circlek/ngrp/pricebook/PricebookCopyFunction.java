@@ -63,7 +63,7 @@ public class PricebookCopyFunction {
         String subject = event.subject;
         String tenant = subject.split("/")[6];
         String store = subject.split("/")[7];
-        if (ALLOWED_TENANTS.contains(tenant)) {
+        if (ALLOWED_TENANTS.contains(tenant) && (INTEG_STORES.contains(store) || QA_STORES.contains(store))) {
             logger.info(format("Pricebook copier starting to copy pricebook for store - %s", store));
             Path pricebookPath = null;
             try {
@@ -88,25 +88,29 @@ public class PricebookCopyFunction {
                 }
             }
         }
+        else {
+            logger.info(format("Skipped pricebook copy for tenant %s and store %s", tenant, store));
+        }
+
     }
 
     void uploadPB(String host, String token, String store, String tenant, Path pricebookPath, Logger logger) throws IOException {
-        CloseableHttpClient client = HttpClients.createDefault();
-        File file = pricebookPath.toFile();
-        HttpPost post = new HttpPost(format("https://%s/pdi/v1/%s/pricebook/%s", host, tenant, store));
-        post.setHeader("Authorization", format("Bearer %s", token));
-        FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-        builder.addPart("file", fileBody);
-        HttpEntity entity = builder.build();
-        post.setEntity(entity);
-        CloseableHttpResponse response;
-        response = client.execute(post);
-        if (response.getStatusLine().getStatusCode() == 201)
-            logger.info(format("Successfully uploaded pricebook for store:%s", store));
-        response.close();
-        client.close();
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            File file = pricebookPath.toFile();
+            HttpPost post = new HttpPost(format("https://%s/pdi/v1/%s/pricebook/%s", host, tenant, store));
+            post.setHeader("Authorization", format("Bearer %s", token));
+            FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+            builder.addPart("file", fileBody);
+            HttpEntity entity = builder.build();
+            post.setEntity(entity);
+            CloseableHttpResponse response;
+            response = client.execute(post);
+            if (response.getStatusLine().getStatusCode() == 201)
+                logger.info(format("Successfully uploaded pricebook for store:%s", store));
+            response.close();
+        }
         deleteLocalPBFile(pricebookPath, logger);
     }
 
