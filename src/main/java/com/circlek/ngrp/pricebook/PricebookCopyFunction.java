@@ -24,9 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,8 +32,8 @@ import static java.lang.String.format;
 
 
 public class PricebookCopyFunction {
-    private static final List<String> INTEG_STORES = new ArrayList<>(Arrays.asList(System.getenv("INTEG_STORES").split(",")));
-    private static final List<String> QA_STORES = new ArrayList<>(Arrays.asList(System.getenv("QA_STORES").split(",")));
+    private static final Set<String> INTEG_STORES = new HashSet<>(Arrays.asList(System.getenv("INTEG_STORES").split(",")));
+    private static final Set<String> QA_STORES = new HashSet<>(Arrays.asList(System.getenv("QA_STORES").split(",")));
 
     private static final String PROD_HOST = System.getenv("PROD_HOST");
 
@@ -49,7 +47,7 @@ public class PricebookCopyFunction {
 
     private static final String INTEG_TOKEN = System.getenv("INTEG_TOKEN");
 
-    private static final List<String> ALLOWED_TENANTS = new ArrayList<>(Arrays.asList(System.getenv("ALLOWED_TENANTS").split(",")));
+    private static final Set<String> ALLOWED_TENANTS = new HashSet<>(Arrays.asList(System.getenv("ALLOWED_TENANTS").split(",")));
 
     @FunctionName("pricebookCopy")
     public void run(
